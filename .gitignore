@@ -1,0 +1,15 @@
+# Dependencies
+node_modules/
+
+# Environment variables (NUNCA commitar chaves de API!)
+.env
+.env.local
+.env.production
+.env*.local
+
+# Vercel
+.vercel
+
+# OS
+.DS_Store
+Thumbs.db

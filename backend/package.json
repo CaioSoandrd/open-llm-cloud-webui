@@ -1,0 +1,20 @@
+{
+  "name": "open-llm-cloud-backend",
+  "version": "1.0.0",
+  "description": "Backend proxy seguro para o zillaGPT (Engnet) - protege chaves de API",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.0",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "openai": "^6.42.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
