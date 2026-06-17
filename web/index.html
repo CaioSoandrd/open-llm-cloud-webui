@@ -129,10 +129,6 @@
      <select class="form-select form-select-lg mb-3 theme" id="modelMode" style="max-width: 100%;"></select>
      <h5 style="text-align: center;">Text to Speech</h5>
      <select class="form-select form-select-lg mb-3 theme" id="voiceModelSelect" style="max-width: 100%;"></select>
-     <h5 style="text-align: center;">API Keys</h5>
-     <button id="setOpenAiKeyButton" class="btn btn-outline-light stylized">Set OpenAi API Key</button>
-     <button id="setDeepinfraKeyButton" class="btn btn-outline-light stylized">Set Deepinfra API Key</button>
-     <button id="setOpenrouterKeyButton" class="btn btn-outline-light stylized">Set Openrouter API Key</button>
     </div>
   </div>
   </div> <!-- modal-content -->
@@ -843,41 +839,7 @@ async function onClickOpenGithub(){
 }
 onClickOpenGithub();
 
-async function onClickSetOpenAiKeyButton(){
-  const button = document.getElementById('setOpenAiKeyButton');
-  button.addEventListener('click', async () => {
-    const newKey = prompt("Enter the new OpenAI API key:");
-    if (newKey != null) {
-      localStorage.setItem('openai-key', newKey);
-      alert("The new key was saved.");
-    }
-  });
-}
-onClickSetOpenAiKeyButton()
-
-async function onClickSetDeepinfraKeyButton(){
-  const button = document.getElementById('setDeepinfraKeyButton');
-  button.addEventListener('click', async () => {
-    const newKey = prompt("Enter the new Deepinfra API key:");
-    if (newKey != null) {
-      localStorage.setItem('deepinfra-key', newKey);
-      alert("The new key was saved.");
-    }
-  });
-}
-onClickSetDeepinfraKeyButton()
-
-async function onClickSetOpenrouterKeyButton(){
-  const button = document.getElementById('setOpenrouterKeyButton');
-  button.addEventListener('click', async () => {
-    const newKey = prompt("Enter the new Openrouter API key:");
-    if (newKey != null) {
-      localStorage.setItem('openrouter-key', newKey);
-      alert("The new key was saved.");
-    }
-  });
-}
-onClickSetOpenrouterKeyButton()
+/* Botões de API Key removidos - chaves ficam seguras no backend */
 
 
 /* End of event listener functions */
