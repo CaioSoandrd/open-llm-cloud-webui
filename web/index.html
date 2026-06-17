@@ -136,10 +136,12 @@
 </div> <!-- modal -->
 
 <script type="module">
-import openailib from 'https://cdn.jsdelivr.net/npm/openai@4.20.1/+esm';
-//console.log("openailib: ",openailib);
+/* Backend proxy URL - altere para a URL do seu servidor no Render */
+const BACKEND_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? 'http://localhost:3001'
+  : 'https://SEU-BACKEND.onrender.com'; // <-- ALTERE AQUI após deploy no Render
+
 /* global variables */
-let openai;
 let modelName;
 let gptTemperature;
 let mensagesObject;
@@ -352,28 +354,7 @@ async function appendChatMessages(userInput){
 
 /* End of chat logic functions */
 
-/* Functions for llm api */
-
-function getDataFromLocalStorage(dataName){
-  const data = localStorage.getItem(dataName);
-  if (data){
-    return data;
-  }else{
-    return "";
-  }
-}
-
-function getOpenAIKey(){
-  return getDataFromLocalStorage("openai-key");
-}
-
-function getDeepinfraKey(){
-  return getDataFromLocalStorage("deepinfra-key");
-}
-
-function getOpenrouterKey(){
-  return getDataFromLocalStorage("openrouter-key");
-}
+/* Functions for llm api (via backend proxy) */
 
 function initializeChat(behavior) {
   return [
@@ -381,27 +362,29 @@ function initializeChat(behavior) {
   ];
 }
 
-async function completionsChatTextModel(messages,modelName) {
+async function completionsChatTextModel(messages, modelName) {
   console.log("Model:", modelName);
-  const parameters ={
+  const response = await fetch(BACKEND_URL + '/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
       model: modelName,
       messages: messages,
       temperature: gptTemperature,
-      /*
-      max_tokens: ,
-      top_p: ,
-      frequency_penalty: ,
-      presence_penalty: ,
-      */
-  };
-  return await openai.chat.completions.create(parameters);
+    }),
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Erro na requisição ao servidor.');
+  }
+  return await response.json();
 }
 
 async function generateChatMessages(promptText, messages) {
   const prompt = {role: "user", content: promptText};
   messages.push(prompt);
 
-  const apiResponse = await completionsChatTextModel(messages,modelName);
+  const apiResponse = await completionsChatTextModel(messages, modelName);
   const textResponse = apiResponse.choices[0].message.content;
 
   const assistantResponse = {role: "assistant", content: textResponse};
@@ -411,21 +394,6 @@ async function generateChatMessages(promptText, messages) {
 }
 
 async function configurar(behavior){
-  const modelArchitecture = getModelArchitecture(modelName);
-  if (modelArchitecture === "deepinfra"){
-    const object = {"apiKey":getDeepinfraKey(),"dangerouslyAllowBrowser":true,"baseURL":"https://api.deepinfra.com/v1/openai"};
-    openai = new openailib(object);
-  }else if (modelArchitecture === "openrouter"){
-    const object = {"apiKey":getOpenrouterKey(),"dangerouslyAllowBrowser":true,"baseURL":"https://openrouter.ai/api/v1"};
-    openai = new openailib(object);
-  }else if (modelArchitecture === "openrouter-gpt-prompt"){
-    const object = {"apiKey":getOpenrouterKey(),"dangerouslyAllowBrowser":true, "baseURL":"https://openrouter.ai/api/v1"};
-    openai = new openailib(object);
-  }else{
-    const object = {"apiKey":getOpenAIKey(),"dangerouslyAllowBrowser":true};
-    openai = new openailib(object);
-  }
-  
   return initializeChat(behavior);
 }
 
@@ -483,17 +451,17 @@ function reader(text, language){
   speechSynthesis.speak(voice);
 };
 
-async function openaiReader(text,voice) {
+async function openaiReader(text, voice) {
   try {
-    const mp3 = await openai.audio.speech.create({
-      model: "tts-1",
-      voice: voice,
-      response_format: "mp3",
-      input: text,
+    const response = await fetch(BACKEND_URL + '/api/speech', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: text, voice: voice }),
     });
+    if (!response.ok) throw new Error('Erro ao gerar áudio.');
 
-    const buffer = await mp3.arrayBuffer();
-    const blob = new Blob([buffer], { type: 'audio/mp3' });
+    const buffer = await response.arrayBuffer();
+    const blob = new Blob([buffer], { type: 'audio/mpeg' });
 
     const url = URL.createObjectURL(blob);
     const audio = new Audio(url);
@@ -857,34 +825,25 @@ function getAssistantLastReply(){
   }
 }
 
-async function verifyAnswer(textToVeify,modelName,temperature){
-  const systemInstructions = "";
-  const userMessagePrompt = "You will be my assistant in verifying information to know if it is real facts or not. You must identify whether the information is false news or an incorrect statement. You should look for information that conflicts with the text provided, look for known information that is incompatible with the text provided. You must write a reflection of at least 5 lines analyzing the information to find out whether it is true or not and then you will skip a line and give a final verdict on the result. Check the following information:\n";
-  const userMessageInstructions = userMessagePrompt + textToVeify;
-  const objectApi = {"apiKey":getOpenAIKey(),"dangerouslyAllowBrowser":true};
-  let apiVerifyAnswer = new openailib(objectApi);
-  if (modelName === "mistralai/Mixtral-8x7B-Instruct-v0.1"){
-    const objectApi = {"apiKey":getDeepinfraKey(),"dangerouslyAllowBrowser":true,"baseURL":"https://api.deepinfra.com/v1/openai"};
-    apiVerifyAnswer = new openailib(objectApi);
-  }
-  let verifyMessages = initializeChat(systemInstructions);
-  const prompt = {role: "user", content: userMessageInstructions};
-  verifyMessages.push(prompt);
+async function verifyAnswer(textToVerify, modelName, temperature){
   console.log("Verification model name:", modelName);
   console.log("Verification temperature:", temperature);
-  const parameters ={
-      model: modelName,
-      messages: verifyMessages,
-      temperature: 0.25,
-  };
   try {
-    const apiResponse = await apiVerifyAnswer.chat.completions.create(parameters);
-    const textResponse = apiResponse.choices[0].message.content;
-    return textResponse;
+    const response = await fetch(BACKEND_URL + '/api/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text: textToVerify,
+        model: modelName,
+        temperature: temperature,
+      }),
+    });
+    if (!response.ok) throw new Error('Erro na verificação.');
+    const data = await response.json();
+    return data.result;
   } catch (error) {
     console.error("Error occurred during API call:", error);
-    const errorMessage = "Erro ao verificar a informação.";
-    return errorMessage;
+    return "Erro ao verificar a informação.";
   }
 }
 
