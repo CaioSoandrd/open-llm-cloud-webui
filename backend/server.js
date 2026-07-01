@@ -186,7 +186,10 @@ app.post('/api/chat', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('[/api/chat] Erro:', error.message);
+    const providerName = getProviderForModel(req.body?.model || '');
+    console.error(`[/api/chat] Erro (provedor: ${providerName}, modelo: ${req.body?.model}):`, error.message);
+    if (error.status) console.error('[/api/chat] Status HTTP:', error.status);
+    if (error.error) console.error('[/api/chat] Detalhe:', JSON.stringify(error.error));
     // OWASP 2025 - Mishandling Exceptions: nunca vazar stacktrace
     return res.status(500).json({ error: 'Erro ao processar a requisição. Tente novamente.' });
   }
