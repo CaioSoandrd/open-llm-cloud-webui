@@ -62,6 +62,10 @@ const PROVIDERS = {
     baseURL: 'https://api.openai.com/v1',
     getKey: () => process.env.OPENAI_API_KEY,
   },
+  google: {
+    baseURL: 'https://generativelanguage.googleapis.com/v1beta/openai/',
+    getKey: () => process.env.GOOGLE_API_KEY,
+  },
   deepinfra: {
     baseURL: 'https://api.deepinfra.com/v1/openai',
     getKey: () => process.env.DEEPINFRA_API_KEY,
@@ -93,6 +97,11 @@ function getProviderForModel(modelName) {
   // Modelos OpenAI (começam com gpt- ou tts-)
   if (modelName.startsWith('gpt-') || modelName.startsWith('tts-')) {
     return 'openai';
+  }
+
+  // Modelos Google (começam com gemini-)
+  if (modelName.startsWith('gemini-')) {
+    return 'google';
   }
 
   // Modelos DeepInfra

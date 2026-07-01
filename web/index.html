@@ -155,6 +155,10 @@ let currentPrompt='';
 const defaultPrompt = 0;
 
 const modelList = [
+  // ── Google Gemini Nativo (Gratuito via AI Studio) ────────────
+  {name:"Gemini 1.5 Flash (Gratuito)",value:"gemini-1.5-flash",architecture:'openai',maxLength: 1000000},
+  {name:"Gemini 2.0 Flash (Gratuito)",value:"gemini-2.0-flash-exp",architecture:'openai',maxLength: 1000000},
+  {name:"Gemini 1.5 Pro (Gratuito)",value:"gemini-1.5-pro",architecture:'openai',maxLength: 2000000},
   // ── OpenAI ──────────────────────────────────────────────────
   {name:"GPT-4o Mini (OpenAI)",value:"gpt-4o-mini",architecture:'openai',maxLength: 128000},
   {name:"GPT-4o (OpenAI)",value:"gpt-4o",architecture:'openai',maxLength: 128000},
