@@ -5,6 +5,8 @@ const rateLimit = require('express-rate-limit');
 const OpenAI = require('openai');
 
 const app = express();
+// Confiança no proxy do Render para o express-rate-limit funcionar corretamente
+app.set('trust proxy', 1);
 const PORT = process.env.PORT || 3001;
 
 // ============================================================
