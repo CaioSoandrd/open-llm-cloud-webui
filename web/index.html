@@ -241,7 +241,7 @@ async function initializeAsPrompt(number){
   //update information
   setPromptModalText(currentPrompt);
   setPromptModalTitle(promptName);
-  appendChatBot("Olá! Eu sou o zillaGPT, uma ferramenta contextualizada para ensinar e ajudar nos projetos da engnet. Como posso te ajudar hoje?");
+  appendChatBot("Olá! Eu sou o ZillaGPT, uma ferramenta contextualizada para ensinar e ajudar nos projetos da EngNet. Como posso te ajudar hoje?");
   appendChatBot(promptObj.description);
   //initialize chat conversation
   if (method === "evry-user-begin" || method === "evry-user-end"){
@@ -793,7 +793,7 @@ onClickTextToSpeechButton();
 async function onClickOpenGithub(){
   const button = document.getElementById('btnOpenGithub');
   button.addEventListener('click', async () => {
-    window.open("https://github.com/luisrguerra/open-llm-cloud-webui", "_blank");
+    window.open("https://github.com/CaioSoandrd/open-llm-cloud-webui", "_blank");
   });
 }
 onClickOpenGithub();
