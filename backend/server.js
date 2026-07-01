@@ -196,7 +196,7 @@ app.post('/api/chat', async (req, res) => {
         body.generationConfig = { temperature };
       }
 
-      const googleUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+      const googleUrl = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${apiKey}`;
       
       const response = await fetch(googleUrl, {
         method: 'POST',
