@@ -63,7 +63,7 @@ const PROVIDERS = {
     getKey: () => process.env.OPENAI_API_KEY,
   },
   google: {
-    baseURL: 'https://generativelanguage.googleapis.com/v1beta/openai/',
+    baseURL: 'https://generativelanguage.googleapis.com/v1beta/openai',
     getKey: () => process.env.GOOGLE_API_KEY,
   },
   deepinfra: {
