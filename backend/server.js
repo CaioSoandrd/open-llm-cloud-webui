@@ -167,6 +167,59 @@ app.post('/api/chat', async (req, res) => {
     }
 
     const providerName = getProviderForModel(model);
+
+    if (providerName === 'google') {
+      // Implementação nativa do Google Gemini via fetch para evitar erros 404 de compatibilidade
+      const apiKey = process.env.GOOGLE_API_KEY;
+      if (!apiKey) throw new Error("Chave de API do Google não configurada.");
+
+      // Converte as mensagens do formato OpenAI para Gemini
+      let systemInstruction = "";
+      const contents = [];
+      
+      for (const msg of messages) {
+        if (msg.role === 'system') {
+          systemInstruction += msg.content + "\n";
+        } else {
+          contents.push({
+            role: msg.role === 'assistant' ? 'model' : 'user',
+            parts: [{ text: msg.content }]
+          });
+        }
+      }
+
+      const body = { contents };
+      if (systemInstruction) {
+        body.systemInstruction = { parts: [{ text: systemInstruction.trim() }] };
+      }
+      if (temperature !== undefined) {
+        body.generationConfig = { temperature };
+      }
+
+      const googleUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+      
+      const response = await fetch(googleUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`${response.status} - ${errText}`);
+      }
+
+      const data = await response.json();
+      const answer = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+
+      return res.json({
+        choices: [{ message: { role: 'assistant', content: answer } }],
+        model: model,
+        usage: { total_tokens: 0 }
+      });
+    }
+
+    // Para OpenAI, DeepInfra, OpenRouter, usa o SDK da OpenAI
     const client = createClient(providerName);
 
     const params = {
